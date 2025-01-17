@@ -2,7 +2,7 @@
 
 
 ## Live Demo
-Check out the live demo [here](#).
+Check out the live demo [Resume Builder](https://basicresumebuild.netlify.app/).
 ## About
 Resume Builder is a web application that allows users to create, customize, and download their resumes in various templates. The app provides a user-friendly interface to input personal information, education, experience, skills, and more. Users can also customize the style of their resume, including colors, fonts, and layout.
 
