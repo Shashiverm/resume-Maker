@@ -127,14 +127,14 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
   const summaryWordCount = data.personalInfo.summary ? data.personalInfo.summary.trim().split(/\s+/).filter(Boolean).length : 0;
 
   return (
-    <div className="space-y-5 max-w-4xl mx-auto pb-12">
+    <div className="space-y-3 max-w-4xl mx-auto pb-8">
       
       {/* Live Futuristic ATS Coach Widget */}
       {atsResult && (
-        <div className="futuristic-card p-5 rounded-3xl border border-blue-200/80 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl glow-blue">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-indigo-900/60 pb-4">
+        <div className="futuristic-card p-3 rounded-2xl border border-blue-200/80 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white shadow-lg glow-blue">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-indigo-900/60 pb-2.5">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center font-black text-lg shadow-md shadow-blue-500/30 text-white shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center font-black text-sm shadow-md shadow-blue-500/30 text-white shrink-0">
                 {atsResult.score}%
               </div>
               <div>
@@ -157,7 +157,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
 
           {/* Missing Keywords Inline Suggestion Bar */}
           {atsResult.missingKeywords.length > 0 && (
-            <div className="mt-4 pt-1 space-y-2">
+            <div className="mt-2.5 pt-1 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Suggested Keywords to Boost ATS Score (Click to Add):
@@ -186,7 +186,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
       <div className="glass-card rounded-2xl overflow-hidden transition-all duration-200">
         <button
           onClick={() => toggleSection('personal')}
-          className="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
+          className="w-full p-3.5 sm:p-4 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
         >
           <div className="flex items-center space-x-3">
             <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl shadow-2xs">
@@ -213,19 +213,19 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
         </button>
 
         {openSections.personal && (
-          <div className="p-5 sm:p-6 pt-0 border-t border-slate-100 bg-white/60 space-y-4 animate-in fade-in duration-150">
+          <div className="p-3.5 sm:p-4 pt-0 border-t border-slate-100 bg-white/60 space-y-3 animate-in fade-in duration-150">
             
             {/* Profile Picture Upload Dropzone */}
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2">
               <div className="flex items-center space-x-3">
                 {data.personalInfo.profileImage ? (
                   <img
                     src={data.personalInfo.profileImage}
                     alt="Profile Avatar"
-                    className="w-12 h-12 rounded-xl object-cover border-2 border-blue-500 shadow-xs"
+                    className="w-10 h-10 rounded-lg object-cover border-2 border-blue-500 shadow-xs"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs border border-blue-200">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px] border border-blue-200">
                     📷 Photo
                   </div>
                 )}
@@ -266,11 +266,11 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">First Name *</label>
                 <input
-                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  className="w-full text-xs p-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all"
                   placeholder="e.g. Alex"
                   value={data.personalInfo.firstName}
                   onChange={(e) => handlePersonalInfoChange('firstName', e.target.value)}
@@ -380,7 +380,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
                 <textarea
                   className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
                   placeholder="Results-oriented professional with 5+ years of experience in..."
-                  rows={4}
+                  rows={3}
                   value={data.personalInfo.summary}
                   onChange={(e) => handlePersonalInfoChange('summary', e.target.value)}
                 />
@@ -394,7 +394,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
       <div className="glass-card rounded-2xl overflow-hidden transition-all duration-200">
         <button
           onClick={() => toggleSection('experience')}
-          className="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
+          className="w-full p-3.5 sm:p-4 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
         >
           <div className="flex items-center space-x-3">
             <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl shadow-2xs">
@@ -419,7 +419,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
         </button>
 
         {openSections.experience && (
-          <div className="p-5 sm:p-6 pt-0 border-t border-slate-100 bg-white/60 space-y-5 animate-in fade-in duration-150">
+          <div className="p-3.5 sm:p-4 pt-0 border-t border-slate-100 bg-white/60 space-y-3 animate-in fade-in duration-150">
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => addItem('experience')}
@@ -442,7 +442,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
               </div>
             ) : (
               data.experience.map((exp, index) => (
-                <div key={exp.id || index} className="p-4 sm:p-5 bg-white border border-slate-200/90 rounded-2xl space-y-4 shadow-2xs transition hover:border-slate-300">
+                <div key={exp.id || index} className="p-3 sm:p-4 bg-white border border-slate-200/90 rounded-xl space-y-2.5 shadow-2xs transition hover:border-slate-300">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-lg border border-indigo-200">
@@ -480,7 +480,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 mb-1">Position Title *</label>
                       <input
@@ -562,7 +562,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
 
                     <textarea
                       className="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white focus:outline-none text-slate-800 font-sans"
-                      rows={4}
+                      rows={3}
                       placeholder="• Spearheaded architectural overhaul of SaaS backend, boosting system throughput by 40%..."
                       value={exp.description}
                       onChange={(e) => handleArrayChange('experience', index, 'description', e.target.value)}
@@ -579,7 +579,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
       <div className="glass-card rounded-2xl overflow-hidden transition-all duration-200">
         <button
           onClick={() => toggleSection('projects')}
-          className="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
+          className="w-full p-3.5 sm:p-4 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
         >
           <div className="flex items-center space-x-3">
             <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl shadow-2xs">
@@ -604,7 +604,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
         </button>
 
         {openSections.projects && (
-          <div className="p-5 sm:p-6 pt-0 border-t border-slate-100 bg-white/60 space-y-4 animate-in fade-in duration-150">
+          <div className="p-3.5 sm:p-4 pt-0 border-t border-slate-100 bg-white/60 space-y-3 animate-in fade-in duration-150">
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => addItem('projects')}
@@ -627,7 +627,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
               </div>
             ) : (
               data.projects?.map((proj, index) => (
-                <div key={proj.id || index} className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-2xs">
+                <div key={proj.id || index} className="p-3 bg-white border border-slate-200 rounded-xl space-y-2.5 shadow-2xs">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200">
                       Project #{index + 1}
@@ -656,7 +656,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       className="text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:bg-white focus:outline-none transition"
                       placeholder="Project Name (e.g. DevPulse Platform)"
@@ -704,7 +704,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
       <div className="glass-card rounded-2xl overflow-hidden transition-all duration-200">
         <button
           onClick={() => toggleSection('education')}
-          className="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
+          className="w-full p-3.5 sm:p-4 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
         >
           <div className="flex items-center space-x-3">
             <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl shadow-2xs">
@@ -729,7 +729,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
         </button>
 
         {openSections.education && (
-          <div className="p-5 sm:p-6 pt-0 border-t border-slate-100 bg-white/60 space-y-4 animate-in fade-in duration-150">
+          <div className="p-3.5 sm:p-4 pt-0 border-t border-slate-100 bg-white/60 space-y-3 animate-in fade-in duration-150">
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => addItem('education')}
@@ -741,7 +741,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
             </div>
 
             {data.education.map((edu, index) => (
-              <div key={edu.id || index} className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-2xs">
+              <div key={edu.id || index} className="p-3 bg-white border border-slate-200 rounded-xl space-y-2.5 shadow-2xs">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-lg border border-purple-200">
                     School #{index + 1}
@@ -770,7 +770,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
                     className="text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white focus:outline-none transition"
                     placeholder="University (UC Berkeley)"
@@ -817,7 +817,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
       <div className="glass-card rounded-2xl overflow-hidden transition-all duration-200">
         <button
           onClick={() => toggleSection('skills')}
-          className="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
+          className="w-full p-3.5 sm:p-4 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
         >
           <div className="flex items-center space-x-3">
             <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl shadow-2xs">
@@ -842,7 +842,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
         </button>
 
         {openSections.skills && (
-          <div className="p-5 sm:p-6 pt-0 border-t border-slate-100 bg-white/60 space-y-4 animate-in fade-in duration-150">
+          <div className="p-3.5 sm:p-4 pt-0 border-t border-slate-100 bg-white/60 space-y-3 animate-in fade-in duration-150">
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => addItem('skills')}
@@ -854,7 +854,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
             </div>
 
             {/* Quick Skill Chips */}
-            <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/70 space-y-2">
+            <div className="p-2.5 bg-amber-50/50 rounded-lg border border-amber-200/70 space-y-1.5">
               <span className="text-[11px] font-bold text-amber-900 flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" /> 1-Tap Popular Additions:
               </span>
@@ -872,7 +872,7 @@ export default function ResumeForm({ data, onChange, atsResult }: ResumeFormProp
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {data.skills.map((skill, index) => (
                 <div key={skill.id || index} className="flex items-center gap-2 p-2 bg-white border border-slate-200 rounded-xl shadow-2xs">
                   <input

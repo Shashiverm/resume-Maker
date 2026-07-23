@@ -293,7 +293,7 @@ function App() {
       case '#builder':
       default:
         return (
-          <main className="flex-grow max-w-7xl w-full mx-auto py-3 sm:py-6 px-2 sm:px-6 lg:px-8">
+          <main className="flex-grow max-w-[1400px] w-full mx-auto py-2 sm:py-4 px-2 sm:px-4 lg:px-6">
 
             {/* Mobile Device Best Fit Alert Banner */}
             {showMobileNotice && (
@@ -315,15 +315,15 @@ function App() {
             )}
 
             {/* Desktop Split View (Grid: 12 columns) */}
-            <div className="hidden lg:grid lg:grid-cols-12 gap-8 items-start">
+            <div className="hidden lg:grid lg:grid-cols-12 gap-5 items-start">
               {/* Left Column: Form Editor */}
-              <div className="lg:col-span-6 space-y-6 print:hidden">
+              <div className="lg:col-span-6 space-y-3 print:hidden">
                 <ResumeForm data={data} onChange={setData} atsResult={atsResult} />
               </div>
 
               {/* Right Column: Live Paper Preview Sticky Container */}
-              <div className="lg:col-span-6 sticky top-20 print:col-span-12">
-                <div className="bg-slate-200/90 p-4 sm:p-6 rounded-2xl border border-slate-300 shadow-inner">
+              <div className="lg:col-span-6 sticky top-[5.5rem] print:col-span-12">
+                <div className="bg-slate-200/90 p-3 sm:p-4 rounded-2xl border border-slate-300 shadow-inner">
                   <ResumePreview data={data} template={template} onUpdateStyle={handleStyleChange} />
                 </div>
               </div>

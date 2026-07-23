@@ -1,16 +1,17 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
   FileText, 
   Download, 
   Settings, 
   ShieldCheck, 
-  Sparkles, 
   Upload, 
   FileCode, 
   RotateCcw,
   Layout,
   Briefcase,
-  ChevronDown
+  ChevronDown,
+  Menu,
+  X
 } from 'lucide-react';
 import { TemplateType, AtsScanResult } from '../types/resume';
 
@@ -51,220 +52,233 @@ export default function HeaderNav({
 }: HeaderNavProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isBuilderView = route === '#builder';
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const getScoreBadgeColor = (score: number) => {
-    if (score >= 85) return 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 shadow-emerald-500/10';
-    if (score >= 70) return 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 shadow-amber-500/10';
-    return 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 shadow-rose-500/10';
+  const getScoreColor = (score: number) => {
+    if (score >= 85) return 'text-emerald-600';
+    if (score >= 70) return 'text-amber-600';
+    return 'text-rose-600';
   };
 
+  const getScoreBg = (score: number) => {
+    if (score >= 85) return 'bg-emerald-500';
+    if (score >= 70) return 'bg-amber-500';
+    return 'bg-rose-500';
+  };
+
+  const navLinks = [
+    { label: 'Home', route: '#landing' },
+    { label: 'Builder', route: '#builder' },
+    { label: 'Templates', route: '#templates' },
+    { label: 'ATS Guide', route: '#ats-guide' },
+  ];
+
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-xs transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
-          
-          {/* Logo & Top Navigation Links */}
-          <div className="flex items-center space-x-6 shrink-0">
+    <header className="sticky top-0 z-40">
+      {/* ── Primary Nav Bar ── */}
+      <div className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between h-12">
+            
+            {/* Logo */}
             <a 
               href="#landing" 
               onClick={(e) => { e.preventDefault(); onNavigate?.('#landing'); }}
-              className="flex items-center space-x-3 cursor-pointer group"
+              className="flex items-center gap-2 cursor-pointer group shrink-0"
             >
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-blue-500/20 text-white font-bold group-hover:scale-105 transition-transform">
-                <FileText className="h-5 w-5" />
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <FileText className="h-4 w-4" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-extrabold text-slate-900 tracking-tight">ATS ResumeMaker</span>
-                  <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <ShieldCheck className="w-3 h-3 mr-1" />
-                    100% Free
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 hidden md:block">Zero Signup • Private Local Save • Instant PDF</p>
-              </div>
+              <span className="text-sm font-extrabold text-slate-900 tracking-tight">ATS ResumeMaker</span>
+              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <ShieldCheck className="w-2.5 h-2.5 mr-0.5" />
+                FREE
+              </span>
             </a>
 
-            {/* Nav Route Links */}
-            <nav className="hidden lg:flex items-center space-x-1 text-xs font-bold text-slate-600">
-              <a 
-                href="#landing" 
-                onClick={(e) => { e.preventDefault(); onNavigate?.('#landing'); }} 
-                className={`px-3 py-1.5 rounded-lg transition ${
-                  route === '' || route === '#landing' || route === '#home' 
-                    ? 'bg-slate-100 text-blue-600 font-extrabold' 
-                    : 'hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                Home
-              </a>
-              <a 
-                href="#builder" 
-                onClick={(e) => { e.preventDefault(); onNavigate?.('#builder'); }} 
-                className={`px-3 py-1.5 rounded-lg transition ${
-                  isBuilderView 
-                    ? 'bg-blue-50 text-blue-600 font-extrabold border border-blue-200' 
-                    : 'hover:bg-slate-100 hover:text-blue-600'
-                }`}
-              >
-                Resume Builder
-              </a>
-              <a 
-                href="#templates" 
-                onClick={(e) => { e.preventDefault(); onNavigate?.('#templates'); }} 
-                className={`px-3 py-1.5 rounded-lg transition ${
-                  route === '#templates' 
-                    ? 'bg-slate-100 text-blue-600 font-extrabold' 
-                    : 'hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                Templates
-              </a>
-              <a 
-                href="#ats-guide" 
-                onClick={(e) => { e.preventDefault(); onNavigate?.('#ats-guide'); }} 
-                className={`px-3 py-1.5 rounded-lg transition ${
-                  route === '#ats-guide' 
-                    ? 'bg-slate-100 text-blue-600 font-extrabold' 
-                    : 'hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                ATS Guide
-              </a>
+            {/* Desktop Nav Links */}
+            <nav className="hidden md:flex items-center gap-0.5 text-[11px] font-semibold text-slate-600">
+              {navLinks.map((link) => {
+                const isActive = route === link.route || 
+                  (link.route === '#landing' && (route === '' || route === '#home'));
+                return (
+                  <a 
+                    key={link.route}
+                    href={link.route} 
+                    onClick={(e) => { e.preventDefault(); onNavigate?.(link.route); }} 
+                    className={`px-2.5 py-1 rounded-md transition ${
+                      isActive 
+                        ? 'bg-blue-50 text-blue-700 font-bold' 
+                        : 'hover:bg-slate-50 hover:text-slate-900'
+                    }`}
+                  >
+                    {link.label}
+                  </a>
+                );
+              })}
             </nav>
-          </div>
 
-          {/* Builder Controls vs Landing Page Primary CTA */}
-          {isBuilderView ? (
-            <>
-              {/* Center Template Picker & Demo Selector (Only on Builder View) */}
-              <div className="hidden md:flex items-center space-x-2 bg-slate-100/80 p-1 rounded-xl border border-slate-200">
+            {/* Right Actions */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {isBuilderView && (
+                <>
+                  {/* ATS Score Pill */}
+                  <button
+                    onClick={onOpenAtsPanel}
+                    className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold bg-slate-50 border border-slate-200 hover:bg-slate-100 transition"
+                    title="View ATS optimization details"
+                  >
+                    <div className={`w-1.5 h-1.5 rounded-full ${getScoreBg(atsResult.score)}`} />
+                    <span className={getScoreColor(atsResult.score)}>{atsResult.score}%</span>
+                    <span className="text-slate-400 font-medium">{atsResult.grade}</span>
+                  </button>
+
+                  {/* Download PDF */}
+                  <button
+                    onClick={onDownloadPdf}
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[11px] font-bold shadow-sm transition active:scale-95"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span className="hidden sm:inline">PDF</span>
+                  </button>
+                </>
+              )}
+
+              {!isBuilderView && (
+                <button
+                  onClick={() => onNavigate?.('#builder')}
+                  className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[11px] font-bold shadow-sm transition active:scale-95"
+                >
+                  Build Resume →
+                </button>
+              )}
+
+              {/* Mobile Menu Toggle */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition"
+              >
+                {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Builder Toolbar (second row, only on builder view) ── */}
+      {isBuilderView && (
+        <div className="bg-slate-50/95 backdrop-blur-sm border-b border-slate-200/60">
+          <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6">
+            <div className="flex items-center justify-between h-9 gap-2 overflow-x-auto scrollbar-hide">
+              
+              {/* Left: Template + Presets */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {/* Template Picker */}
                 <div className="relative">
                   <select
                     value={template}
                     onChange={(e) => onTemplateChange(e.target.value as TemplateType)}
-                    className="appearance-none pl-8 pr-8 py-1.5 bg-white text-slate-800 text-xs rounded-lg font-semibold shadow-xs border border-slate-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                    className="appearance-none pl-6 pr-6 py-1 bg-white text-slate-800 text-[11px] rounded-md font-semibold border border-slate-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
                   >
-                    <optgroup label="📋 Standard ATS Formats">
-                      <option value="standard-ats">📄 Standard ATS (100% Parsable)</option>
-                      <option value="minimal">✨ Minimalist Slate</option>
-                      <option value="compact">⚡ Compact 1-Page</option>
+                    <optgroup label="ATS Formats">
+                      <option value="standard-ats">Standard ATS</option>
+                      <option value="minimal">Minimalist</option>
+                      <option value="compact">Compact 1-Page</option>
                     </optgroup>
-
-                    <optgroup label="🚀 Tech & Analytics Formats">
-                      <option value="tech-code">💻 Software Engineering & Tech</option>
-                      <option value="data-analyst">📊 Data Science & Analytics</option>
-                      <option value="modern">⚡ Modern Contemporary</option>
+                    <optgroup label="Tech & Analytics">
+                      <option value="tech-code">Software Eng</option>
+                      <option value="data-analyst">Data Science</option>
+                      <option value="modern">Modern</option>
                     </optgroup>
-
-                    <optgroup label="🎨 Creative & Headshot Formats">
-                      <option value="photo-creative">📷 Creative Profile Photo</option>
+                    <optgroup label="Creative">
+                      <option value="photo-creative">Photo Creative</option>
                     </optgroup>
-
-                    <optgroup label="💼 Business & Growth Formats">
-                      <option value="sales-growth">📈 Sales & Revenue Leadership</option>
-                      <option value="marketing-pro">🎯 Digital Marketing Lead</option>
-                      <option value="executive">💼 Executive Corporate</option>
-                      <option value="academic">🏛️ Academic & Legal</option>
+                    <optgroup label="Business">
+                      <option value="sales-growth">Sales</option>
+                      <option value="marketing-pro">Marketing</option>
+                      <option value="executive">Executive</option>
+                      <option value="academic">Academic</option>
                     </optgroup>
                   </select>
-                  <Layout className="w-3.5 h-3.5 text-blue-600 absolute left-2.5 top-2.5 pointer-events-none" />
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+                  <Layout className="w-3 h-3 text-blue-500 absolute left-2 top-[7px] pointer-events-none" />
+                  <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 top-[7px] pointer-events-none" />
                 </div>
 
-                <div className="relative">
+                {/* Presets */}
+                <div className="relative hidden sm:block">
                   <select
                     onChange={(e) => {
                       if (e.target.value) onLoadDemo(e.target.value);
                       e.target.value = '';
                     }}
                     defaultValue=""
-                    className="appearance-none pl-7 pr-7 py-1.5 bg-slate-50 hover:bg-white text-slate-700 text-xs rounded-lg font-medium cursor-pointer border border-transparent hover:border-slate-200 focus:outline-none transition"
+                    className="appearance-none pl-6 pr-5 py-1 bg-white hover:bg-slate-50 text-slate-700 text-[11px] rounded-md font-medium cursor-pointer border border-slate-200 focus:outline-none transition"
                   >
-                    <option value="" disabled>✨ Load Industry Presets</option>
-                    <option value="softwareEngineer">💻 Software Engineer</option>
-                    <option value="dataAnalyst">📊 Data Analyst & Scientist</option>
-                    <option value="marketingManager">📈 Marketing Lead</option>
-                    <option value="salesDirector">🎯 Sales Director</option>
+                    <option value="" disabled>Presets</option>
+                    <option value="softwareEngineer">💻 Software Eng</option>
+                    <option value="dataAnalyst">📊 Data Analyst</option>
+                    <option value="marketingManager">📈 Marketing</option>
+                    <option value="salesDirector">🎯 Sales</option>
                   </select>
-                  <Briefcase className="w-3.5 h-3.5 text-amber-500 absolute left-2 top-2.5 pointer-events-none" />
+                  <Briefcase className="w-3 h-3 text-amber-500 absolute left-2 top-[7px] pointer-events-none" />
                 </div>
-              </div>
 
-              {/* Right Action Bar (Only on Builder View) */}
-              <div className="flex items-center space-x-2 shrink-0">
+                <div className="w-px h-4 bg-slate-200 mx-0.5 hidden sm:block" />
 
-                {/* Style Drawer Toggle */}
+                {/* Style Toggle */}
                 <button
                   onClick={onToggleStyleSettings}
-                  className={`flex items-center px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                  className={`flex items-center gap-1 px-2 py-1 text-[11px] font-medium rounded-md border transition ${
                     showStyleSettings
-                      ? 'bg-blue-50 text-blue-700 border-blue-300 ring-2 ring-blue-500/20 shadow-xs'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-xs'
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                   }`}
-                  title="Customize fonts, accent colors, and margins"
                 >
-                  <Settings className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
-                  <span className="hidden sm:inline">Design &</span> Style
+                  <Settings className="w-3 h-3" />
+                  <span className="hidden sm:inline">Style</span>
                 </button>
+              </div>
 
-                {/* ATS Score Button */}
-                <button
-                  onClick={onOpenAtsPanel}
-                  className={`flex items-center px-3 py-1.5 rounded-xl text-xs font-bold border shadow-xs transition-all transform hover:scale-[1.02] ${getScoreBadgeColor(atsResult.score)}`}
-                  title="Click to open ATS optimization panel"
-                >
-                  <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-500" />
-                  <span>ATS {atsResult.score}%</span>
-                  <span className="hidden sm:inline ml-1 font-semibold">({atsResult.grade})</span>
-                </button>
-
-                {/* Download PDF Primary Button */}
-                <button
-                  onClick={onDownloadPdf}
-                  className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/25 transition-all transform hover:scale-[1.02] active:scale-95"
-                >
-                  <Download className="w-3.5 h-3.5 mr-1.5" />
-                  Download PDF
-                </button>
-
-                {/* Extra Options Dropdown */}
+              {/* Right: Export options */}
+              <div className="flex items-center gap-1 shrink-0">
                 <div className="relative group">
                   <button
-                    className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 transition"
-                    title="Backup and Export options"
+                    className="flex items-center gap-1 px-2 py-1 bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 rounded-md text-[11px] font-medium transition"
+                    title="Export & backup options"
                   >
-                    •••
+                    <FileCode className="w-3 h-3" />
+                    <span className="hidden sm:inline">Export</span>
+                    <ChevronDown className="w-2.5 h-2.5 text-slate-400" />
                   </button>
 
-                  <div className="absolute right-0 mt-1 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl py-1.5 hidden group-hover:block z-50 animate-in fade-in duration-150">
+                  <div className="absolute right-0 mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-lg py-1 hidden group-hover:block z-50">
                     <button
                       onClick={onExportJson}
-                      className="w-full text-left px-3.5 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center font-medium"
+                      className="w-full text-left px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 flex items-center font-medium"
                     >
-                      <FileCode className="w-3.5 h-3.5 mr-2 text-indigo-600" />
-                      Export JSON Backup
+                      <FileCode className="w-3 h-3 mr-2 text-indigo-500" />
+                      JSON Backup
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full text-left px-3.5 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center font-medium"
+                      className="w-full text-left px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 flex items-center font-medium"
                     >
-                      <Upload className="w-3.5 h-3.5 mr-2 text-blue-600" />
-                      Import JSON Backup
+                      <Upload className="w-3 h-3 mr-2 text-blue-500" />
+                      Import JSON
                     </button>
                     <button
                       onClick={onExportTxt}
-                      className="w-full text-left px-3.5 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center font-medium"
+                      className="w-full text-left px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 flex items-center font-medium"
                     >
-                      <FileText className="w-3.5 h-3.5 mr-2 text-emerald-600" />
-                      Export Plain Text (.txt)
+                      <FileText className="w-3 h-3 mr-2 text-emerald-500" />
+                      Plain Text (.txt)
                     </button>
-                    <div className="border-t border-slate-100 my-1"></div>
+                    <div className="border-t border-slate-100 my-0.5" />
                     <button
                       onClick={onResetData}
-                      className="w-full text-left px-3.5 py-2 text-rose-600 hover:bg-rose-50 flex items-center font-semibold"
+                      className="w-full text-left px-3 py-1.5 text-[11px] text-rose-600 hover:bg-rose-50 flex items-center font-semibold"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 mr-2" />
+                      <RotateCcw className="w-3 h-3 mr-2" />
                       Reset to Blank
                     </button>
                   </div>
@@ -277,24 +291,35 @@ export default function HeaderNav({
                     className="hidden"
                   />
                 </div>
-
               </div>
-            </>
-          ) : (
-            /* Non-builder routes (Landing page, Templates, etc.): Render primary CTA */
-            <div className="flex items-center space-x-3 shrink-0">
-              <button
-                onClick={() => onNavigate?.('#builder')}
-                className="px-5 py-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-xl text-xs font-extrabold shadow-md shadow-blue-500/25 transition-all transform hover:scale-[1.03] active:scale-95 cursor-pointer flex items-center gap-1.5"
-              >
-                <span>Build Resume Free</span>
-                <span className="text-sm">→</span>
-              </button>
             </div>
-          )}
-
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* ── Mobile Menu Drawer ── */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white border-b border-slate-200 shadow-lg animate-in slide-in-from-top duration-150">
+          <div className="px-4 py-3 space-y-1">
+            {navLinks.map((link) => {
+              const isActive = route === link.route || 
+                (link.route === '#landing' && (route === '' || route === '#home'));
+              return (
+                <a 
+                  key={link.route}
+                  href={link.route} 
+                  onClick={(e) => { e.preventDefault(); onNavigate?.(link.route); setMobileMenuOpen(false); }} 
+                  className={`block px-3 py-2 rounded-lg text-xs font-semibold transition ${
+                    isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

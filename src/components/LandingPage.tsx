@@ -1,14 +1,14 @@
-import { 
-  Sparkles, 
-  FileText, 
-  ShieldCheck, 
-  Zap, 
-  Download, 
-  ArrowRight, 
-  CheckCircle2, 
-  Layout, 
-  Briefcase, 
-  Sliders, 
+import {
+  Sparkles,
+  FileText,
+  ShieldCheck,
+  Zap,
+  Download,
+  ArrowRight,
+  CheckCircle2,
+  Layout,
+  Briefcase,
+  Sliders,
   Lock,
   Star
 } from 'lucide-react';
@@ -33,21 +33,21 @@ export default function LandingPage({ onStartBuilding, onNavigate }: LandingPage
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white">
-      
+
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 border-b border-slate-800/80 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
-        
+
         {/* Background Mesh Gradients */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          
+
           {/* Top Pill Badge */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-semibold backdrop-blur-md">
               <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
-              <span>Free ATS Resume Maker • Inspired by Resume.io & Zety</span>
+              <span>Free ATS Resume Maker </span>
               <span className="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">100% FREE</span>
             </div>
           </div>
@@ -57,9 +57,9 @@ export default function LandingPage({ onStartBuilding, onNavigate }: LandingPage
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
               Create an <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">ATS-Proof, Job-Winning Resume</span> in 5 Minutes
             </h1>
-            
+
             <p className="text-base sm:text-xl text-slate-400 max-w-2xl mx-auto font-normal leading-relaxed">
-              Build professional resumes formatted for applicant tracking systems. 
+              Build professional resumes formatted for applicant tracking systems.
               Zero signup required, 100% private local save, and instant unlimited PDF downloads.
             </p>
 
@@ -116,7 +116,7 @@ export default function LandingPage({ onStartBuilding, onNavigate }: LandingPage
                   </div>
                   <h3 className="text-xl font-bold text-white">Full Control Over Every Resume Section</h3>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Easily add experience, skills, custom metrics, and candidate headshots. 
+                    Easily add experience, skills, custom metrics, and candidate headshots.
                     Our built-in action verb assistant helps you craft bullet points recruiters love.
                   </p>
                   <div className="flex flex-wrap gap-2 text-xs font-semibold pt-1">
@@ -190,7 +190,7 @@ export default function LandingPage({ onStartBuilding, onNavigate }: LandingPage
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
+
             {/* Feature 1 */}
             <div className="bg-slate-900/80 p-8 rounded-3xl border border-slate-800 space-y-4 hover:border-blue-500/50 transition">
               <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold">
@@ -248,7 +248,7 @@ export default function LandingPage({ onStartBuilding, onNavigate }: LandingPage
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {templatesList.map((tpl) => (
-              <div 
+              <div
                 key={tpl.id}
                 onClick={() => onStartBuilding(tpl.id)}
                 className="group bg-slate-900 border border-slate-800 rounded-3xl p-5 hover:border-blue-500/60 transition cursor-pointer flex flex-col justify-between"
