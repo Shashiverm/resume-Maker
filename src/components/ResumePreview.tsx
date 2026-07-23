@@ -5,9 +5,10 @@ import { ZoomIn, ZoomOut } from 'lucide-react';
 interface ResumePreviewProps {
   data: Resume;
   template: TemplateType;
+  onUpdateStyle?: (field: string, val: string) => void;
 }
 
-export default function ResumePreview({ data, template }: ResumePreviewProps) {
+export default function ResumePreview({ data, template, onUpdateStyle }: ResumePreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [estimatedPages, setEstimatedPages] = useState<number>(1);
@@ -1111,6 +1112,102 @@ export default function ResumePreview({ data, template }: ResumePreviewProps) {
           </section>
         )}
       </div>
+    ),
+
+    // 12. CREATIVE HEADSHOT & PROFILE PHOTO TEMPLATE
+    'photo-creative': (
+      <div 
+        ref={containerRef}
+        id="resume-printable"
+        className={`bg-white p-6 sm:p-10 md:p-12 shadow-2xl rounded-sm ${paperWidthClass} mx-auto ${getSpacingClass(style.spacingDensity)} print:shadow-none print:p-0 print:max-w-none ${getFontSizeClass(style.fontSize)}`}
+        style={baseContainerStyle}
+      >
+        <header className="border-b-2 border-violet-600 pb-5 space-y-3 page-break-avoid">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 sm:space-x-5">
+            {data.personalInfo.profileImage ? (
+              <img
+                src={data.personalInfo.profileImage}
+                alt={`${data.personalInfo.firstName} ${data.personalInfo.lastName}`}
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-violet-600 shadow-md shrink-0"
+              />
+            ) : (
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center text-2xl font-bold border-2 border-violet-600 shadow-md shrink-0">
+                {data.personalInfo.firstName ? data.personalInfo.firstName[0] : 'C'}
+                {data.personalInfo.lastName ? data.personalInfo.lastName[0] : 'A'}
+              </div>
+            )}
+
+            <div className="text-center sm:text-left space-y-1 flex-1">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+                {data.personalInfo.firstName} <span className="text-violet-600">{data.personalInfo.lastName}</span>
+              </h1>
+              <p className="text-sm font-semibold text-slate-700">{data.personalInfo.title}</p>
+              
+              <div className="flex flex-wrap justify-center sm:justify-start gap-x-3 gap-y-1 text-xs text-slate-600 pt-1 font-medium">
+                {data.personalInfo.email && <span>✉ {data.personalInfo.email}</span>}
+                {data.personalInfo.phone && <span>📞 {data.personalInfo.phone}</span>}
+                {data.personalInfo.location && <span>📍 {data.personalInfo.location}</span>}
+                {data.personalInfo.linkedin && <span>🔗 {data.personalInfo.linkedin}</span>}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {data.personalInfo.summary && (
+          <section className="space-y-1 page-break-avoid">
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-violet-700 border-b border-slate-200 pb-1">
+              Professional Biography
+            </h2>
+            <p className="text-slate-800 text-xs sm:text-sm leading-relaxed">{data.personalInfo.summary}</p>
+          </section>
+        )}
+
+        {data.experience.length > 0 && (
+          <section className="space-y-3">
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-violet-700 border-b border-slate-200 pb-1">
+              Experience & Achievements
+            </h2>
+            {data.experience.map((exp, index) => (
+              <div key={exp.id || index} className="space-y-1 page-break-avoid">
+                <div className="flex justify-between font-bold text-slate-900 text-xs sm:text-sm">
+                  <span>{exp.position} &mdash; <span className="text-violet-700">{exp.company}</span></span>
+                  <span className="text-xs font-semibold text-slate-500">{exp.startDate} – {exp.isCurrent ? 'Present' : exp.endDate}</span>
+                </div>
+                {renderBullets(exp.description)}
+              </div>
+            ))}
+          </section>
+        )}
+
+        {data.skills.length > 0 && (
+          <section className="space-y-1.5 page-break-avoid">
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-violet-700 border-b border-slate-200 pb-1">
+              Core Skills & Expertise
+            </h2>
+            <div className="flex flex-wrap gap-1.5">
+              {data.skills.map((s, idx) => (
+                <span key={s.id || idx} className="bg-violet-50 border border-violet-200 text-violet-900 font-semibold text-[11px] px-2.5 py-0.5 rounded-lg">
+                  {s.name}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {data.education.length > 0 && (
+          <section className="space-y-1 page-break-avoid">
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-violet-700 border-b border-slate-200 pb-1">
+              Education & Degrees
+            </h2>
+            {data.education.map((edu, index) => (
+              <div key={edu.id || index} className="flex justify-between text-xs text-slate-800">
+                <span><strong>{edu.school}</strong> – {edu.degree} in {edu.fieldOfStudy}</span>
+                <span>{edu.startDate} – {edu.endDate}</span>
+              </div>
+            ))}
+          </section>
+        )}
+      </div>
     )
   };
 
@@ -1165,13 +1262,23 @@ export default function ResumePreview({ data, template }: ResumePreviewProps) {
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className={`font-bold px-2.5 py-1 rounded-full text-[11px] shadow-2xs ${
+          <span className={`font-bold px-2.5 py-1 rounded-full text-[11px] shadow-2xs flex items-center gap-1 ${
             estimatedPages === 1 
               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-              : 'bg-amber-50 text-amber-700 border border-amber-200'
+              : 'bg-amber-50 text-amber-800 border border-amber-300'
           }`}>
-            {estimatedPages === 1 ? '✓ 1-Page Fit' : `📄 ${estimatedPages} Pages`}
+            {estimatedPages === 1 ? '⚡ 1-Page Perfect Fit' : `📄 Spilling onto ${estimatedPages} Pages`}
           </span>
+
+          {estimatedPages > 1 && onUpdateStyle && (
+            <button
+              onClick={() => onUpdateStyle('spacingDensity', 'compact')}
+              className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-extrabold rounded-full shadow-xs transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+              title="Click to automatically tighten margins & line height to fit on 1 page"
+            >
+              Auto-Fit 1 Page ⚡
+            </button>
+          )}
         </div>
       </div>
 

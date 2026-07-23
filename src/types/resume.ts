@@ -58,6 +58,7 @@ export interface PersonalInfo {
   website?: string;
   github?: string;
   linkedin?: string;
+  profileImage?: string;
 }
 
 export interface ResumeStyle {
@@ -94,7 +95,8 @@ export type TemplateType =
   | 'tech-code'
   | 'data-analyst'
   | 'sales-growth'
-  | 'marketing-pro';
+  | 'marketing-pro'
+  | 'photo-creative';
 
 export interface AtsScanResult {
   score: number;

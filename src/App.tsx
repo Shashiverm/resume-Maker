@@ -7,12 +7,14 @@ import FaqPage from './components/FaqPage';
 import PrivacyPolicyPage from './components/PrivacyPolicyPage';
 import TermsPage from './components/TermsPage';
 import AtsGuidePage from './components/AtsGuidePage';
-import Footer from './components/Footer';
+import LandingPage from './components/LandingPage';
+import TemplateGallery from './components/TemplateGallery';
 import { Resume, TemplateType } from './types/resume';
 import { calculateAtsScore } from './utils/atsScanner';
 import { DEMO_RESUMES } from './utils/presetData';
 import { FileText, Eye, Sparkles, Download } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
+import Footer from './components/Footer';
 
 const LOCAL_STORAGE_KEY = 'ats_resume_maker_data_v2';
 
@@ -258,18 +260,41 @@ function App() {
   // MPA Page Router Render Logic
   const renderPageContent = () => {
     switch (route) {
+      case '#landing':
+      case '#home':
+      case '':
+        return (
+          <LandingPage
+            onStartBuilding={(chosenTemplate) => {
+              if (chosenTemplate) setTemplate(chosenTemplate);
+              navigateTo('#builder');
+            }}
+            onNavigate={navigateTo}
+          />
+        );
+      case '#templates':
+        return (
+          <TemplateGallery
+            onSelectTemplate={(chosenTemplate) => {
+              setTemplate(chosenTemplate);
+              navigateTo('#builder');
+            }}
+            onNavigateHome={() => navigateTo('#landing')}
+          />
+        );
       case '#faq':
-        return <FaqPage onNavigateHome={() => navigateTo('')} />;
+        return <FaqPage onNavigateHome={() => navigateTo('#builder')} />;
       case '#privacy':
-        return <PrivacyPolicyPage onNavigateHome={() => navigateTo('')} />;
+        return <PrivacyPolicyPage onNavigateHome={() => navigateTo('#builder')} />;
       case '#terms':
-        return <TermsPage onNavigateHome={() => navigateTo('')} />;
+        return <TermsPage onNavigateHome={() => navigateTo('#builder')} />;
       case '#ats-guide':
-        return <AtsGuidePage onNavigateHome={() => navigateTo('')} />;
+        return <AtsGuidePage onNavigateHome={() => navigateTo('#builder')} />;
+      case '#builder':
       default:
         return (
           <main className="flex-grow max-w-7xl w-full mx-auto py-3 sm:py-6 px-2 sm:px-6 lg:px-8">
-            
+
             {/* Mobile Device Best Fit Alert Banner */}
             {showMobileNotice && (
               <div className="lg:hidden mb-4 p-3 bg-indigo-900 text-indigo-100 rounded-2xl shadow-md border border-indigo-700/60 flex items-start justify-between gap-2 animate-in fade-in duration-200">
@@ -293,20 +318,20 @@ function App() {
             <div className="hidden lg:grid lg:grid-cols-12 gap-8 items-start">
               {/* Left Column: Form Editor */}
               <div className="lg:col-span-6 space-y-6 print:hidden">
-                <ResumeForm data={data} onChange={setData} />
+                <ResumeForm data={data} onChange={setData} atsResult={atsResult} />
               </div>
 
               {/* Right Column: Live Paper Preview Sticky Container */}
               <div className="lg:col-span-6 sticky top-20 print:col-span-12">
                 <div className="bg-slate-200/90 p-4 sm:p-6 rounded-2xl border border-slate-300 shadow-inner">
-                  <ResumePreview data={data} template={template} />
+                  <ResumePreview data={data} template={template} onUpdateStyle={handleStyleChange} />
                 </div>
               </div>
             </div>
 
             {/* Mobile / Tablet Single Column View */}
             <div className="block lg:hidden space-y-4">
-              
+
               {/* Mobile Template & Demo Selector Toolbar */}
               <div className="bg-white p-2.5 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap gap-2 items-center justify-between">
                 <div className="flex-1 min-w-[140px]">
@@ -319,6 +344,7 @@ function App() {
                     <option value="standard-ats">📄 Standard ATS</option>
                     <option value="tech-code">💻 Software Eng & Tech</option>
                     <option value="data-analyst">📊 Data Analytics</option>
+                    <option value="photo-creative">📷 Creative Photo</option>
                     <option value="sales-growth">📈 Sales Leadership</option>
                     <option value="marketing-pro">🎯 Marketing Lead</option>
                     <option value="modern">⚡ Modern Contemporary</option>
@@ -348,10 +374,10 @@ function App() {
               </div>
 
               {mobileTab === 'form' ? (
-                <ResumeForm data={data} onChange={setData} />
+                <ResumeForm data={data} onChange={setData} atsResult={atsResult} />
               ) : (
                 <div className="bg-slate-200/90 p-2 sm:p-4 rounded-2xl border border-slate-300">
-                  <ResumePreview data={data} template={template} />
+                  <ResumePreview data={data} template={template} onUpdateStyle={handleStyleChange} />
                 </div>
               )}
             </div>
@@ -362,10 +388,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans pb-16 lg:pb-0">
-      
+
       {/* Top Sticky Nav */}
       <div className="print:hidden">
         <HeaderNav
+          route={route}
           template={template}
           onTemplateChange={setTemplate}
           view={mobileTab}
@@ -380,11 +407,12 @@ function App() {
           onResetData={handleResetData}
           atsResult={atsResult}
           onOpenAtsPanel={() => setIsAtsPanelOpen(true)}
+          onNavigate={navigateTo}
         />
       </div>
 
-      {/* Style Controls Drawer (only on Home route) */}
-      {showStyleSettings && route === '' && (
+      {/* Style Controls Drawer */}
+      {showStyleSettings && (route === '' || route === '#builder') && (
         <div className="bg-white border-b border-gray-200 shadow-xs print:hidden animate-in slide-in-from-top duration-200">
           <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -482,9 +510,8 @@ function App() {
           <div className="flex items-center justify-around gap-1 max-w-md mx-auto">
             <button
               onClick={() => setMobileTab('form')}
-              className={`flex-1 flex flex-col items-center py-1.5 rounded-xl text-xs font-semibold transition ${
-                mobileTab === 'form' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              className={`flex-1 flex flex-col items-center py-1.5 rounded-xl text-xs font-semibold transition ${mobileTab === 'form' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+                }`}
             >
               <FileText className="w-4 h-4 mb-0.5" />
               <span>Form</span>
@@ -492,9 +519,8 @@ function App() {
 
             <button
               onClick={() => setMobileTab('preview')}
-              className={`flex-1 flex flex-col items-center py-1.5 rounded-xl text-xs font-semibold transition ${
-                mobileTab === 'preview' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              className={`flex-1 flex flex-col items-center py-1.5 rounded-xl text-xs font-semibold transition ${mobileTab === 'preview' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+                }`}
             >
               <Eye className="w-4 h-4 mb-0.5" />
               <span>Preview</span>
