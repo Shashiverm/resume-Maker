@@ -418,12 +418,27 @@ function App() {
                 <select
                   value={data.style?.fontFamily || 'Inter'}
                   onChange={(e) => handleStyleChange('fontFamily', e.target.value)}
-                  className="w-full text-xs p-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full text-xs p-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                 >
-                  <option value="Inter">Inter (Modern Clean)</option>
-                  <option value="Roboto">Roboto (Corporate Tech)</option>
-                  <option value="Merriweather">Merriweather (Classic Serif)</option>
-                  <option value="JetBrains Mono">JetBrains Mono (Technical Code)</option>
+                  <optgroup label="Sans-Serif (Modern & Clean)">
+                    <option value="Inter">Inter (Modern Clean)</option>
+                    <option value="Roboto">Roboto (Corporate Tech)</option>
+                    <option value="Outfit">Outfit (Trendy Minimal)</option>
+                    <option value="Poppins">Poppins (Geometric Sans)</option>
+                    <option value="Plus Jakarta Sans">Plus Jakarta Sans (Contemporary)</option>
+                  </optgroup>
+
+                  <optgroup label="Serif (Classic & Executive)">
+                    <option value="Merriweather">Merriweather (Classic Serif)</option>
+                    <option value="Playfair Display">Playfair Display (Executive)</option>
+                    <option value="Lora">Lora (Editorial Serif)</option>
+                  </optgroup>
+
+                  <optgroup label="Monospace (Technical & Code)">
+                    <option value="JetBrains Mono">JetBrains Mono (Technical)</option>
+                    <option value="Fira Code">Fira Code (Developer Mono)</option>
+                  </optgroup>
+
                   <option value="system-ui">System UI Default</option>
                 </select>
               </div>

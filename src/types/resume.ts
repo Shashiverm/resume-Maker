@@ -62,7 +62,7 @@ export interface PersonalInfo {
 
 export interface ResumeStyle {
   primaryColor: string;
-  fontFamily: 'Inter' | 'Roboto' | 'Merriweather' | 'JetBrains Mono' | 'Playfair Display' | 'system-ui';
+  fontFamily: 'Inter' | 'Roboto' | 'Outfit' | 'Poppins' | 'Plus Jakarta Sans' | 'Merriweather' | 'Playfair Display' | 'Lora' | 'JetBrains Mono' | 'Fira Code' | 'system-ui';
   fontSize: 'sm' | 'base' | 'lg';
   lineHeight: 'tight' | 'normal' | 'relaxed';
   spacingDensity: 'compact' | 'normal' | 'loose';

@@ -60,9 +60,14 @@ export default function ResumePreview({ data, template }: ResumePreviewProps) {
   const getFontFamilyStyle = (font: string) => {
     switch (font) {
       case 'Roboto': return "'Roboto', sans-serif";
+      case 'Outfit': return "'Outfit', sans-serif";
+      case 'Poppins': return "'Poppins', sans-serif";
+      case 'Plus Jakarta Sans': return "'Plus Jakarta Sans', sans-serif";
       case 'Merriweather': return "'Merriweather', Georgia, serif";
       case 'Playfair Display': return "'Playfair Display', Georgia, serif";
+      case 'Lora': return "'Lora', Georgia, serif";
       case 'JetBrains Mono': return "'JetBrains Mono', monospace";
+      case 'Fira Code': return "'Fira Code', monospace";
       case 'Inter': return "'Inter', sans-serif";
       default: return 'system-ui, -apple-system, sans-serif';
     }
@@ -70,17 +75,25 @@ export default function ResumePreview({ data, template }: ResumePreviewProps) {
 
   const getFontSizeClass = (size: string) => {
     switch (size) {
-      case 'sm': return 'text-xs leading-relaxed';
+      case 'sm': return 'text-[11.5px] leading-snug';
       case 'lg': return 'text-base leading-relaxed';
-      default: return 'text-sm leading-normal';
+      default: return 'text-xs sm:text-sm leading-normal';
     }
   };
 
   const getSpacingClass = (density: string) => {
     switch (density) {
-      case 'compact': return 'space-y-2.5';
-      case 'loose': return 'space-y-7';
-      default: return 'space-y-5';
+      case 'compact': return 'space-y-2';
+      case 'loose': return 'space-y-6';
+      default: return 'space-y-4';
+    }
+  };
+
+  const getPaddingClass = (density: string) => {
+    switch (density) {
+      case 'compact': return 'p-4 sm:p-6 md:p-7';
+      case 'loose': return 'p-8 sm:p-12 md:p-14';
+      default: return 'p-6 sm:p-10 md:p-12';
     }
   };
 
@@ -118,7 +131,7 @@ export default function ResumePreview({ data, template }: ResumePreviewProps) {
       <div 
         ref={containerRef}
         id="resume-printable"
-        className={`bg-white p-6 sm:p-10 md:p-12 shadow-2xl rounded-sm ${paperWidthClass} mx-auto ${getSpacingClass(style.spacingDensity)} print:shadow-none print:p-0 print:max-w-none ${getFontSizeClass(style.fontSize)}`}
+        className={`bg-white ${getPaddingClass(style.spacingDensity)} shadow-2xl rounded-sm ${paperWidthClass} mx-auto ${getSpacingClass(style.spacingDensity)} print:shadow-none print:p-0 print:max-w-none ${getFontSizeClass(style.fontSize)}`}
         style={baseContainerStyle}
       >
         {/* Header */}
