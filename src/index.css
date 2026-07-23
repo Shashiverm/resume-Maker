@@ -1,42 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Roboto:wght@300;400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
-  .input-field {
-    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border;
-  }
-  
-  .btn-primary {
-    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
-  }
-  
-  .btn-secondary {
-    @apply inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-blue-500 selection:text-white;
   }
 }
 
-/* Print styles */
+/* Glassmorphism & Custom UI Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(241, 245, 249, 1);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+}
+
+/* Page break avoidance utility for PDF generation */
+.page-break-avoid {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
+
+/* Mobile Paper Scaler Container */
+.paper-preview-viewport {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0.5rem 0;
+}
+
+.gradient-banner {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%);
+}
+
+.accent-glow {
+  box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
+}
+
+/* Smooth custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Print styles for exact PDF export without breaking elements across pages */
 @media print {
   @page {
-    size: A4;
-    margin: 0;
+    size: auto;
+    margin: 10mm 12mm;
   }
 
   body {
-    visibility: hidden;
+    background-color: white !important;
+    color: black !important;
+    font-size: 12pt;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  .resume-preview {
-    visibility: visible;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 21cm;
-    height: 29.7cm;
-  }
-
-  nav, button, .style-settings {
+  /* Hide all web UI chrome */
+  header, footer, nav, button, .print\:hidden, [role="dialog"], .glass-panel {
     display: none !important;
+  }
+
+  /* Make printable resume fill full printable container */
+  #resume-printable {
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    background: transparent !important;
+    transform: none !important;
+  }
+
+  /* Ensure section items do not split across pages */
+  #resume-printable section,
+  #resume-printable section > div {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }

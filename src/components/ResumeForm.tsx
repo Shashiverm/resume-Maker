@@ -1,6 +1,28 @@
-import React from 'react';
-import { PersonalInfo, Education, Experience, Skill, Resume } from '../types/resume';
-import { PlusCircle, MinusCircle } from 'lucide-react';
+import { useState } from 'react';
+import { 
+  PersonalInfo, 
+  Resume 
+} from '../types/resume';
+import { 
+  PlusCircle, 
+  Trash2, 
+  User, 
+  Briefcase, 
+  GraduationCap, 
+  FolderKanban, 
+  Wrench, 
+  Sparkles, 
+  Linkedin, 
+  Github, 
+  Globe, 
+  Mail, 
+  Phone, 
+  MapPin,
+  ChevronUp,
+  ChevronDown,
+  CheckCircle2
+} from 'lucide-react';
+import BulletAssistantModal from './BulletAssistantModal';
 
 interface ResumeFormProps {
   data: Resume;
@@ -8,6 +30,22 @@ interface ResumeFormProps {
 }
 
 export default function ResumeForm({ data, onChange }: ResumeFormProps) {
+  const [activeExpIndexForBullet, setActiveExpIndexForBullet] = useState<number | null>(null);
+  
+  // Section Accordion Open States (all open by default for seamless editing)
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    personal: true,
+    experience: true,
+    projects: true,
+    education: true,
+    skills: true,
+    certificates: true
+  });
+
+  const toggleSection = (sectionKey: string) => {
+    setOpenSections((prev) => ({ ...prev, [sectionKey]: !prev[sectionKey] }));
+  };
+
   const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
     onChange({
       ...data,
@@ -15,367 +53,760 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
     });
   };
 
-  const handleArrayChange = <T extends keyof Resume>(
+  const handleArrayChange = <T extends 'experience' | 'education' | 'projects' | 'skills' | 'certificates'>(
     type: T,
     index: number,
     field: string,
-    value: string
+    value: string | boolean | number
   ) => {
-    const newArray = [...(data[type] as any[])];
-    newArray[index] = { ...newArray[index], [field]: value };
-    onChange({ ...data, [type]: newArray });
+    const list = [...(data[type] || [])];
+    list[index] = { ...list[index], [field]: value };
+    onChange({ ...data, [type]: list });
   };
 
-  const addItem = <T extends keyof Resume>(type: T) => {
-    let newItem: any;
-    
-    switch (type) {
-      case 'skills':
-        newItem = { name: '', level: 'Beginner' };
-        break;
-      case 'education':
-        newItem = { school: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', description: '' };
-        break;
-      case 'experience':
-        newItem = { company: '', position: '', location: '', startDate: '', endDate: '', description: '' };
-        break;
-      case 'certificates':
-        newItem = { title: '', issuer: '', date: '', description: '', link: '' };
-        break;
-      default:
-        return;
+  const addItem = (type: 'experience' | 'education' | 'projects' | 'skills' | 'certificates') => {
+    const id = `${type}-${Date.now()}`;
+    let newItem: Record<string, string | boolean>;
+
+    if (type === 'experience') {
+      newItem = { id, company: '', position: '', location: '', startDate: '', endDate: '', isCurrent: false, description: '' };
+    } else if (type === 'education') {
+      newItem = { id, school: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', description: '', gpa: '' };
+    } else if (type === 'projects') {
+      newItem = { id, title: '', role: '', startDate: '', endDate: '', link: '', description: '', technologies: '' };
+    } else if (type === 'skills') {
+      newItem = { id, name: '', category: 'Technical', level: 'Advanced' };
+    } else {
+      newItem = { id, title: '', issuer: '', date: '', description: '', link: '' };
     }
-    
-    onChange({ ...data, [type]: [...(data[type] as any[] || []), newItem] });
+
+    onChange({ ...data, [type]: [...(data[type] || []), newItem] });
   };
 
-  const removeItem = <T extends keyof Resume>(type: T, index: number) => {
-    onChange({
-      ...data,
-      [type]: (data[type] as any[]).filter((_, i) => i !== index),
-    });
+  const removeItem = (type: 'experience' | 'education' | 'projects' | 'skills' | 'certificates', index: number) => {
+    const list = (data[type] || []).filter((_, i) => i !== index);
+    onChange({ ...data, [type]: list });
+  };
+
+  const moveItem = <T extends 'experience' | 'education' | 'projects' | 'skills' | 'certificates'>(
+    type: T,
+    index: number,
+    direction: 'up' | 'down'
+  ) => {
+    const list = [...(data[type] || [])];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= list.length) return;
+    
+    const temp = list[index];
+    list[index] = list[targetIndex];
+    list[targetIndex] = temp;
+
+    onChange({ ...data, [type]: list });
+  };
+
+  const insertBulletText = (bulletText: string) => {
+    if (activeExpIndexForBullet === null) return;
+    const currentExp = data.experience[activeExpIndexForBullet];
+    if (!currentExp) return;
+
+    const existingDesc = currentExp.description || '';
+    const newDesc = existingDesc ? `${existingDesc}\n• ${bulletText}` : `• ${bulletText}`;
+    
+    handleArrayChange('experience', activeExpIndexForBullet, 'description', newDesc);
+  };
+
+  const QUICK_SKILL_SUGGESTIONS = ['React', 'TypeScript', 'Node.js', 'Python', 'SQL', 'AWS', 'Agile / Scrum', 'Project Management', 'Communication', 'Data Analysis'];
+
+  const addQuickSkill = (skillName: string) => {
+    const exists = data.skills.some((s) => s.name.toLowerCase() === skillName.toLowerCase());
+    if (!exists) {
+      const newSkill = { id: `sk-${Date.now()}`, name: skillName, category: 'Technical', level: 'Advanced' as const };
+      onChange({ ...data, skills: [...data.skills, newSkill] });
+    }
   };
 
   return (
-    <div className="space-y-8 max-w-3xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            className="input-field"
-            placeholder="First Name"
-            value={data.personalInfo.firstName}
-            onChange={(e) => handlePersonalInfoChange('firstName', e.target.value)}
-          />
-          <input
-            className="input-field"
-            placeholder="Last Name"
-            value={data.personalInfo.lastName}
-            onChange={(e) => handlePersonalInfoChange('lastName', e.target.value)}
-          />
-          <input
-            className="input-field"
-            placeholder="Email"
-            type="email"
-            value={data.personalInfo.email}
-            onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
-          />
-          <input
-            className="input-field"
-            placeholder="Phone"
-            value={data.personalInfo.phone}
-            onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
-          />
-          <input
-            className="input-field col-span-2"
-            placeholder="Professional Title"
-            value={data.personalInfo.title}
-            onChange={(e) => handlePersonalInfoChange('title', e.target.value)}
-          />
-          <input
-            className="input-field col-span-2"
-            placeholder="Location"
-            value={data.personalInfo.location}
-            onChange={(e) => handlePersonalInfoChange('location', e.target.value)}
-          />
-          <input
-            className="input-field"
-            placeholder="Website (optional)"
-            value={data.personalInfo.website}
-            onChange={(e) => handlePersonalInfoChange('website', e.target.value)}
-          />
-          <input
-            className="input-field"
-            placeholder="GitHub Username (optional)"
-            value={data.personalInfo.github}
-            onChange={(e) => handlePersonalInfoChange('github', e.target.value)}
-          />
-          <textarea
-            className="input-field col-span-2"
-            placeholder="Professional Summary"
-            rows={4}
-            value={data.personalInfo.summary}
-            onChange={(e) => handlePersonalInfoChange('summary', e.target.value)}
-          />
-        </div>
-      </div>
+    <div className="space-y-5 max-w-4xl mx-auto pb-12">
+      
+      {/* 1. Personal Information Section Card */}
+      <div className="glass-card rounded-2xl overflow-hidden transition-all duration-200">
+        <button
+          onClick={() => toggleSection('personal')}
+          className="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl shadow-2xs">
+              <User className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-base font-bold text-slate-900">Personal & Contact Details</h2>
+                {data.personalInfo.email && data.personalInfo.phone && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700">
+                    <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600" /> Complete
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500">Contact information parsed by ATS and recruiters.</p>
+            </div>
+          </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Experience</h2>
-          <button
-            onClick={() => addItem('experience')}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            <PlusCircle className="w-6 h-6" />
-          </button>
-        </div>
-        {data.experience.map((exp, index) => (
-          <div key={index} className="mb-6 border-b pb-4 last:border-0">
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                className="input-field"
-                placeholder="Company"
-                value={exp.company}
-                onChange={(e) =>
-                  handleArrayChange('experience', index, 'company', e.target.value)
-                }
-              />
-              <input
-                className="input-field"
-                placeholder="Position"
-                value={exp.position}
-                onChange={(e) =>
-                  handleArrayChange('experience', index, 'position', e.target.value)
-                }
-              />
-              <input
-                className="input-field"
-                placeholder="Location"
-                value={exp.location}
-                onChange={(e) =>
-                  handleArrayChange('experience', index, 'location', e.target.value)
-                }
-              />
-              <div className="flex gap-2">
+          <ChevronDown
+            className={`w-5 h-5 text-slate-400 transform transition-transform duration-200 ${
+              openSections.personal ? 'rotate-180 text-blue-600' : ''
+            }`}
+          />
+        </button>
+
+        {openSections.personal && (
+          <div className="p-5 sm:p-6 pt-0 border-t border-slate-100 bg-white/60 space-y-4 animate-in fade-in duration-150">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">First Name *</label>
                 <input
-                  className="input-field"
-                  type="date"
-                  value={exp.startDate}
-                  onChange={(e) =>
-                    handleArrayChange('experience', index, 'startDate', e.target.value)
-                  }
-                />
-                <input
-                  className="input-field"
-                  type="date"
-                  value={exp.endDate}
-                  onChange={(e) =>
-                    handleArrayChange('experience', index, 'endDate', e.target.value)
-                  }
+                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  placeholder="e.g. Alex"
+                  value={data.personalInfo.firstName}
+                  onChange={(e) => handlePersonalInfoChange('firstName', e.target.value)}
                 />
               </div>
-              <textarea
-                className="input-field col-span-2"
-                placeholder="Description"
-                rows={3}
-                value={exp.description}
-                onChange={(e) =>
-                  handleArrayChange('experience', index, 'description', e.target.value)
-                }
-              />
-            </div>
-            <button
-              onClick={() => removeItem('experience', index)}
-              className="text-red-600 hover:text-red-800 mt-2"
-            >
-              <MinusCircle className="w-5 h-5" />
-            </button>
-          </div>
-        ))}
-      </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Education</h2>
-          <button
-            onClick={() => addItem('education')}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            <PlusCircle className="w-6 h-6" />
-          </button>
-        </div>
-        {data.education.map((edu, index) => (
-          <div key={index} className="mb-6 border-b pb-4 last:border-0">
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                className="input-field"
-                placeholder="School"
-                value={edu.school}
-                onChange={(e) =>
-                  handleArrayChange('education', index, 'school', e.target.value)
-                }
-              />
-              <input
-                className="input-field"
-                placeholder="Degree"
-                value={edu.degree}
-                onChange={(e) =>
-                  handleArrayChange('education', index, 'degree', e.target.value)
-                }
-              />
-              <input
-                className="input-field"
-                placeholder="Field of Study"
-                value={edu.fieldOfStudy}
-                onChange={(e) =>
-                  handleArrayChange('education', index, 'fieldOfStudy', e.target.value)
-                }
-              />
-              <div className="flex gap-2">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Last Name *</label>
                 <input
-                  className="input-field"
-                  type="date"
-                  value={edu.startDate}
-                  onChange={(e) =>
-                    handleArrayChange('education', index, 'startDate', e.target.value)
-                  }
-                />
-                <input
-                  className="input-field"
-                  type="date"
-                  value={edu.endDate}
-                  onChange={(e) =>
-                    handleArrayChange('education', index, 'endDate', e.target.value)
-                  }
+                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  placeholder="e.g. Morgan"
+                  value={data.personalInfo.lastName}
+                  onChange={(e) => handlePersonalInfoChange('lastName', e.target.value)}
                 />
               </div>
-              <textarea
-                className="input-field col-span-2"
-                placeholder="Description"
-                rows={3}
-                value={edu.description}
-                onChange={(e) =>
-                  handleArrayChange('education', index, 'description', e.target.value)
-                }
-              />
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-bold text-slate-700 mb-1">Target Job Title *</label>
+                <input
+                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  placeholder="e.g. Senior Full Stack Engineer / Growth Marketing Director"
+                  value={data.personalInfo.title}
+                  onChange={(e) => handlePersonalInfoChange('title', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                  <Mail className="w-3.5 h-3.5 text-slate-400" /> Email Address *
+                </label>
+                <input
+                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  placeholder="alex@example.com"
+                  type="email"
+                  value={data.personalInfo.email}
+                  onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5 text-slate-400" /> Phone Number *
+                </label>
+                <input
+                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  placeholder="+1 (555) 123-4567"
+                  value={data.personalInfo.phone}
+                  onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" /> Location (City, State/Country) *
+                </label>
+                <input
+                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  placeholder="San Francisco, CA"
+                  value={data.personalInfo.location}
+                  onChange={(e) => handlePersonalInfoChange('location', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                  <Linkedin className="w-3.5 h-3.5 text-blue-600" /> LinkedIn Profile
+                </label>
+                <input
+                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  placeholder="linkedin.com/in/username"
+                  value={data.personalInfo.linkedin || ''}
+                  onChange={(e) => handlePersonalInfoChange('linkedin', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                  <Globe className="w-3.5 h-3.5 text-indigo-600" /> Portfolio Website
+                </label>
+                <input
+                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  placeholder="https://yourportfolio.com"
+                  value={data.personalInfo.website || ''}
+                  onChange={(e) => handlePersonalInfoChange('website', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                  <Github className="w-3.5 h-3.5 text-slate-800" /> GitHub Username
+                </label>
+                <input
+                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  placeholder="github-username"
+                  value={data.personalInfo.github || ''}
+                  onChange={(e) => handlePersonalInfoChange('github', e.target.value)}
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-xs font-bold text-slate-700">Professional Summary (30–60 words)</label>
+                  <span className="text-[11px] text-slate-400 font-mono">
+                    {data.personalInfo.summary ? data.personalInfo.summary.split(/\s+/).filter(Boolean).length : 0} words
+                  </span>
+                </div>
+                <textarea
+                  className="w-full text-xs p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:outline-none transition-all shadow-2xs"
+                  placeholder="Results-oriented professional with 5+ years of experience in..."
+                  rows={4}
+                  value={data.personalInfo.summary}
+                  onChange={(e) => handlePersonalInfoChange('summary', e.target.value)}
+                />
+              </div>
             </div>
-            <button
-              onClick={() => removeItem('education', index)}
-              className="text-red-600 hover:text-red-800 mt-2"
-            >
-              <MinusCircle className="w-5 h-5" />
-            </button>
           </div>
-        ))}
+        )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Skills</h2>
-          <button
-            onClick={() => addItem('skills')}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            <PlusCircle className="w-6 h-6" />
-          </button>
-        </div>
-        {data.skills.map((skill, index) => (
-          <div key={index} className="flex items-center gap-4 mb-4">
-            <input
-              className="input-field flex-1"
-              placeholder="Skill"
-              value={skill.name}
-              onChange={(e) =>
-                handleArrayChange('skills', index, 'name', e.target.value)
-              }
-            />
-            <select
-              className="input-field w-40"
-              value={skill.level}
-              onChange={(e) =>
-                handleArrayChange('skills', index, 'level', e.target.value)
-              }
-            >
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
-              <option value="Expert">Expert</option>
-            </select>
-            <button
-              onClick={() => removeItem('skills', index)}
-              className="text-red-600 hover:text-red-800"
-            >
-              <MinusCircle className="w-5 h-5" />
-            </button>
+      {/* 2. Professional Experience Card */}
+      <div className="glass-card rounded-2xl overflow-hidden transition-all duration-200">
+        <button
+          onClick={() => toggleSection('experience')}
+          className="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl shadow-2xs">
+              <Briefcase className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-base font-bold text-slate-900">Work Experience</h2>
+                <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded-full border border-indigo-200">
+                  {data.experience.length} Roles
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">List roles in reverse chronological order with metric bullets.</p>
+            </div>
           </div>
-        ))}
+
+          <ChevronDown
+            className={`w-5 h-5 text-slate-400 transform transition-transform duration-200 ${
+              openSections.experience ? 'rotate-180 text-indigo-600' : ''
+            }`}
+          />
+        </button>
+
+        {openSections.experience && (
+          <div className="p-5 sm:p-6 pt-0 border-t border-slate-100 bg-white/60 space-y-5 animate-in fade-in duration-150">
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => addItem('experience')}
+                className="flex items-center px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm transition transform hover:scale-[1.02]"
+              >
+                <PlusCircle className="w-4 h-4 mr-1.5" />
+                Add Role
+              </button>
+            </div>
+
+            {data.experience.length === 0 ? (
+              <div className="p-8 text-center bg-slate-50/80 rounded-2xl border border-dashed border-slate-300">
+                <p className="text-xs text-slate-500 mb-3">No work experience added yet.</p>
+                <button
+                  onClick={() => addItem('experience')}
+                  className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition"
+                >
+                  + Add First Role
+                </button>
+              </div>
+            ) : (
+              data.experience.map((exp, index) => (
+                <div key={exp.id || index} className="p-4 sm:p-5 bg-white border border-slate-200/90 rounded-2xl space-y-4 shadow-2xs transition hover:border-slate-300">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-lg border border-indigo-200">
+                        Role #{index + 1}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-800 truncate max-w-[150px] sm:max-w-xs">
+                        {exp.position || 'Untitled Position'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => moveItem('experience', index, 'up')}
+                        disabled={index === 0}
+                        className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 transition"
+                        title="Move up"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => moveItem('experience', index, 'down')}
+                        disabled={index === data.experience.length - 1}
+                        className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 transition"
+                        title="Move down"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => removeItem('experience', index)}
+                        className="p-1 text-slate-400 hover:text-rose-600 transition"
+                        title="Remove role"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Position Title *</label>
+                      <input
+                        className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white focus:outline-none transition"
+                        placeholder="e.g. Senior Software Engineer"
+                        value={exp.position}
+                        onChange={(e) => handleArrayChange('experience', index, 'position', e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Company Name *</label>
+                      <input
+                        className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white focus:outline-none transition"
+                        placeholder="e.g. Google / CloudScale"
+                        value={exp.company}
+                        onChange={(e) => handleArrayChange('experience', index, 'company', e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Location</label>
+                      <input
+                        className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white focus:outline-none transition"
+                        placeholder="e.g. San Francisco, CA / Remote"
+                        value={exp.location}
+                        onChange={(e) => handleArrayChange('experience', index, 'location', e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Employment Dates</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          className="w-1/2 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white focus:outline-none transition"
+                          placeholder="Start (Jan 2021)"
+                          value={exp.startDate}
+                          onChange={(e) => handleArrayChange('experience', index, 'startDate', e.target.value)}
+                        />
+                        <input
+                          className="w-1/2 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white focus:outline-none transition disabled:bg-slate-100 disabled:text-slate-400"
+                          placeholder={exp.isCurrent ? 'Present' : 'End (Dec 2023)'}
+                          disabled={exp.isCurrent}
+                          value={exp.isCurrent ? 'Present' : exp.endDate}
+                          onChange={(e) => handleArrayChange('experience', index, 'endDate', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`current-${index}`}
+                      checked={Boolean(exp.isCurrent)}
+                      onChange={(e) => {
+                        handleArrayChange('experience', index, 'isCurrent', e.target.checked);
+                        if (e.target.checked) handleArrayChange('experience', index, 'endDate', 'Present');
+                      }}
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                    />
+                    <label htmlFor={`current-${index}`} className="text-xs font-medium text-slate-700 cursor-pointer">
+                      I currently work in this role
+                    </label>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center justify-between gap-1">
+                      <label className="text-xs font-bold text-slate-700">Bullet Points & Impact Metrics</label>
+                      <button
+                        type="button"
+                        onClick={() => setActiveExpIndexForBullet(index)}
+                        className="flex items-center px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-[11px] font-semibold transition"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1 text-amber-600" />
+                        Action Verbs Helper
+                      </button>
+                    </div>
+
+                    <textarea
+                      className="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white focus:outline-none text-slate-800 font-sans"
+                      rows={4}
+                      placeholder="• Spearheaded architectural overhaul of SaaS backend, boosting system throughput by 40%..."
+                      value={exp.description}
+                      onChange={(e) => handleArrayChange('experience', index, 'description', e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Certificates</h2>
-          <button
-            onClick={() => addItem('certificates')}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            <PlusCircle className="w-6 h-6" />
-          </button>
-        </div>
-        {data.certificates?.map((cert, index) => (
-          <div key={index} className="mb-6 border-b pb-4 last:border-0">
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                className="input-field"
-                placeholder="Certificate Title"
-                value={cert.title}
-                onChange={(e) =>
-                  handleArrayChange('certificates', index, 'title', e.target.value)
-                }
-              />
-              <input
-                className="input-field"
-                placeholder="Issuer"
-                value={cert.issuer}
-                onChange={(e) =>
-                  handleArrayChange('certificates', index, 'issuer', e.target.value)
-                }
-              />
-              <input
-                className="input-field"
-                type="date"
-                value={cert.date}
-                onChange={(e) =>
-                  handleArrayChange('certificates', index, 'date', e.target.value)
-                }
-              />
-              <input
-                className="input-field"
-                placeholder="Certificate Link (optional)"
-                value={cert.link}
-                onChange={(e) =>
-                  handleArrayChange('certificates', index, 'link', e.target.value)
-                }
-              />
-              <textarea
-                className="input-field col-span-2"
-                placeholder="Description"
-                rows={2}
-                value={cert.description}
-                onChange={(e) =>
-                  handleArrayChange('certificates', index, 'description', e.target.value)
-                }
-              />
+      {/* 3. Featured Projects Card */}
+      <div className="glass-card rounded-2xl overflow-hidden transition-all duration-200">
+        <button
+          onClick={() => toggleSection('projects')}
+          className="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl shadow-2xs">
+              <FolderKanban className="w-5 h-5" />
             </div>
-            <button
-              onClick={() => removeItem('certificates', index)}
-              className="text-red-600 hover:text-red-800 mt-2"
-            >
-              <MinusCircle className="w-5 h-5" />
-            </button>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-base font-bold text-slate-900">Featured Projects</h2>
+                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-200">
+                  {data.projects?.length || 0} Projects
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">Showcase software apps, key initiatives, or portfolio projects.</p>
+            </div>
           </div>
-        ))}
+
+          <ChevronDown
+            className={`w-5 h-5 text-slate-400 transform transition-transform duration-200 ${
+              openSections.projects ? 'rotate-180 text-emerald-600' : ''
+            }`}
+          />
+        </button>
+
+        {openSections.projects && (
+          <div className="p-5 sm:p-6 pt-0 border-t border-slate-100 bg-white/60 space-y-4 animate-in fade-in duration-150">
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => addItem('projects')}
+                className="flex items-center px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition transform hover:scale-[1.02]"
+              >
+                <PlusCircle className="w-4 h-4 mr-1.5" />
+                Add Project
+              </button>
+            </div>
+
+            {data.projects?.length === 0 ? (
+              <div className="p-6 text-center bg-slate-50/80 rounded-2xl border border-dashed border-slate-300">
+                <p className="text-xs text-slate-500 mb-2">No projects added yet.</p>
+                <button
+                  onClick={() => addItem('projects')}
+                  className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold hover:bg-emerald-100 transition"
+                >
+                  + Add Project
+                </button>
+              </div>
+            ) : (
+              data.projects?.map((proj, index) => (
+                <div key={proj.id || index} className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200">
+                      Project #{index + 1}
+                    </span>
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => moveItem('projects', index, 'up')}
+                        disabled={index === 0}
+                        className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 transition"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => moveItem('projects', index, 'down')}
+                        disabled={index === (data.projects?.length || 0) - 1}
+                        className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 transition"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => removeItem('projects', index)}
+                        className="p-1 text-slate-400 hover:text-rose-600 transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input
+                      className="text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:bg-white focus:outline-none transition"
+                      placeholder="Project Name (e.g. DevPulse Platform)"
+                      value={proj.title}
+                      onChange={(e) => handleArrayChange('projects', index, 'title', e.target.value)}
+                    />
+
+                    <input
+                      className="text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:bg-white focus:outline-none transition"
+                      placeholder="Role (e.g. Lead Developer)"
+                      value={proj.role || ''}
+                      onChange={(e) => handleArrayChange('projects', index, 'role', e.target.value)}
+                    />
+
+                    <input
+                      className="text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:bg-white focus:outline-none transition"
+                      placeholder="Technologies (React, Node.js, AWS)"
+                      value={proj.technologies || ''}
+                      onChange={(e) => handleArrayChange('projects', index, 'technologies', e.target.value)}
+                    />
+
+                    <input
+                      className="text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:bg-white focus:outline-none transition"
+                      placeholder="Project Link (https://...)"
+                      value={proj.link || ''}
+                      onChange={(e) => handleArrayChange('projects', index, 'link', e.target.value)}
+                    />
+                  </div>
+
+                  <textarea
+                    className="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:bg-white focus:outline-none"
+                    rows={2}
+                    placeholder="Brief description of the project outcome..."
+                    value={proj.description}
+                    onChange={(e) => handleArrayChange('projects', index, 'description', e.target.value)}
+                  />
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
+
+      {/* 4. Education Card */}
+      <div className="glass-card rounded-2xl overflow-hidden transition-all duration-200">
+        <button
+          onClick={() => toggleSection('education')}
+          className="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl shadow-2xs">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-base font-bold text-slate-900">Education</h2>
+                <span className="px-2 py-0.5 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full border border-purple-200">
+                  {data.education.length} Entries
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">Degrees, academic honors, and university credentials.</p>
+            </div>
+          </div>
+
+          <ChevronDown
+            className={`w-5 h-5 text-slate-400 transform transition-transform duration-200 ${
+              openSections.education ? 'rotate-180 text-purple-600' : ''
+            }`}
+          />
+        </button>
+
+        {openSections.education && (
+          <div className="p-5 sm:p-6 pt-0 border-t border-slate-100 bg-white/60 space-y-4 animate-in fade-in duration-150">
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => addItem('education')}
+                className="flex items-center px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition transform hover:scale-[1.02]"
+              >
+                <PlusCircle className="w-4 h-4 mr-1.5" />
+                Add School
+              </button>
+            </div>
+
+            {data.education.map((edu, index) => (
+              <div key={edu.id || index} className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-lg border border-purple-200">
+                    School #{index + 1}
+                  </span>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={() => moveItem('education', index, 'up')}
+                      disabled={index === 0}
+                      className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 transition"
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => moveItem('education', index, 'down')}
+                      disabled={index === data.education.length - 1}
+                      className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30 transition"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => removeItem('education', index)}
+                      className="p-1 text-slate-400 hover:text-rose-600 transition"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input
+                    className="text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white focus:outline-none transition"
+                    placeholder="University (UC Berkeley)"
+                    value={edu.school}
+                    onChange={(e) => handleArrayChange('education', index, 'school', e.target.value)}
+                  />
+
+                  <input
+                    className="text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white focus:outline-none transition"
+                    placeholder="Degree (Bachelor of Science)"
+                    value={edu.degree}
+                    onChange={(e) => handleArrayChange('education', index, 'degree', e.target.value)}
+                  />
+
+                  <input
+                    className="text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white focus:outline-none transition"
+                    placeholder="Field of Study (Computer Science)"
+                    value={edu.fieldOfStudy}
+                    onChange={(e) => handleArrayChange('education', index, 'fieldOfStudy', e.target.value)}
+                  />
+
+                  <div className="flex gap-2">
+                    <input
+                      className="w-1/2 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white focus:outline-none transition"
+                      placeholder="Start (2015)"
+                      value={edu.startDate}
+                      onChange={(e) => handleArrayChange('education', index, 'startDate', e.target.value)}
+                    />
+                    <input
+                      className="w-1/2 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 focus:bg-white focus:outline-none transition"
+                      placeholder="End (2019)"
+                      value={edu.endDate}
+                      onChange={(e) => handleArrayChange('education', index, 'endDate', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 5. Core Skills Card */}
+      <div className="glass-card rounded-2xl overflow-hidden transition-all duration-200">
+        <button
+          onClick={() => toggleSection('skills')}
+          className="w-full p-5 sm:p-6 text-left flex items-center justify-between bg-white hover:bg-slate-50/80 transition"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl shadow-2xs">
+              <Wrench className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-base font-bold text-slate-900">Skills & Competencies</h2>
+                <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full border border-amber-200">
+                  {data.skills.length} Listed
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">Tools, frameworks, languages, and technical expertise.</p>
+            </div>
+          </div>
+
+          <ChevronDown
+            className={`w-5 h-5 text-slate-400 transform transition-transform duration-200 ${
+              openSections.skills ? 'rotate-180 text-amber-600' : ''
+            }`}
+          />
+        </button>
+
+        {openSections.skills && (
+          <div className="p-5 sm:p-6 pt-0 border-t border-slate-100 bg-white/60 space-y-4 animate-in fade-in duration-150">
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => addItem('skills')}
+                className="flex items-center px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-sm transition transform hover:scale-[1.02]"
+              >
+                <PlusCircle className="w-4 h-4 mr-1.5" />
+                Add Skill
+              </button>
+            </div>
+
+            {/* Quick Skill Chips */}
+            <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/70 space-y-2">
+              <span className="text-[11px] font-bold text-amber-900 flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" /> 1-Tap Popular Additions:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {QUICK_SKILL_SUGGESTIONS.map((skillName) => (
+                  <button
+                    key={skillName}
+                    type="button"
+                    onClick={() => addQuickSkill(skillName)}
+                    className="px-2.5 py-1 bg-white hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg text-xs font-medium transition cursor-pointer"
+                  >
+                    + {skillName}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {data.skills.map((skill, index) => (
+                <div key={skill.id || index} className="flex items-center gap-2 p-2 bg-white border border-slate-200 rounded-xl shadow-2xs">
+                  <input
+                    className="flex-grow text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:outline-none font-medium"
+                    placeholder="Skill Name (React, SQL)"
+                    value={skill.name}
+                    onChange={(e) => handleArrayChange('skills', index, 'name', e.target.value)}
+                  />
+
+                  <select
+                    className="text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:outline-none"
+                    value={skill.level}
+                    onChange={(e) => handleArrayChange('skills', index, 'level', e.target.value)}
+                  >
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                    <option value="Expert">Expert</option>
+                  </select>
+
+                  <button
+                    onClick={() => removeItem('skills', index)}
+                    className="p-1.5 text-slate-400 hover:text-rose-600 transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bullet Assistant Modal */}
+      <BulletAssistantModal
+        isOpen={activeExpIndexForBullet !== null}
+        onClose={() => setActiveExpIndexForBullet(null)}
+        onSelectBullet={insertBulletText}
+      />
+
     </div>
   );
 }
